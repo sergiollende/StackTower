@@ -25,6 +25,37 @@
             font-size: 40px;
             align-items: center;
         }
+
+        .score {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .difficulty {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .difficulty.show {
+            opacity: 1;
+        }
+
+        .difficulty label {
+            margin: 0 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .difficulty label:hover {
+            transform: scale(1.1);
+        }
     </style>
 
     <script type="module">
@@ -32,6 +63,7 @@
         const context = canvas.getContext('2d');
 
         const score = document.getElementById('score');
+        const difficultyDiv = document.querySelector('.difficulty');
 
         const MODES = {
             START: 'start',
@@ -40,12 +72,18 @@
         }
 
         const INITIAL_BOX_WIDTH = 250;
-        const INITIAL_BOX_Y = 950;
+        const INITIAL_BOX_Y = 750;
 
         const BOX_HEIGHT = 50;
         const INITIAL_Y_SPEED = 5;
         const INTITIAL_X_SPEED = 2;
-        const Y_SPEED_INCREMENT = 0.1;
+        let X_SPEED_INCREMENT = 0.2;
+
+        const DIFFICULTY = {
+            EASY: 0.2,
+            MEDIUM: 0.4,
+            HARD: 0.7
+        }
 
         // STATE
         let boxes = [];
@@ -54,8 +92,8 @@
         let baseColor;
 
         function getRandomBaseColor() {
-        const hue = Math.floor(Math.random() * 360);
-        return `hsl(${hue}, 100%, 50%)`;
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 100%, 50%)`;
         }
 
         function createStepColor(index) {
@@ -92,7 +130,7 @@
             ySpeed = INITIAL_Y_SPEED;
             scrollCounteer = 0; 
             cameraY = 0;
- 
+
             createNewBox();
         }
 
@@ -113,6 +151,9 @@
                 context.font = 'bold 30px Arial';
                 context.textAlign = 'center';
                 context.fillText('Press Space to Start', canvas.width / 2, canvas.height / 2);
+                difficultyDiv.classList.add('show');
+            } else {
+                difficultyDiv.classList.remove('show');
             }
             
             if(mode == MODES.BOUNCE){
@@ -216,7 +257,7 @@
             adjustCurrentBox(difference);
             createNewDebris(difference);
 
-            xSpeed += xSpeed > 0 ? 0.1 : -0.1;
+            xSpeed += xSpeed > 0 ? X_SPEED_INCREMENT : -X_SPEED_INCREMENT;
             current++;
             scrollCounteer = BOX_HEIGHT
             mode = MODES.BOUNCE;
@@ -260,11 +301,24 @@
                 mode = MODES.BOUNCE;
             }
         }
+
+        document.querySelectorAll('input[name="difficulty"]').forEach((radio) => {
+            radio.addEventListener('change', (event) => {
+                const selectedDifficulty = event.target.value;
+                X_SPEED_INCREMENT = DIFFICULTY[selectedDifficulty.toUpperCase()];
+            });
+        });
+
         restartGame();
     </script>
 </head>
 <body>
-    <span>Score: <span id="score">0 </span> </span>
-    <canvas id="canvas" width="520" height="800"></canvas>
+    <h2 class="score"><span>Score: <span id="score">0 </span> </span></h2>
+    <canvas id="canvas" width="420" height="600"></canvas>
+    <div class="difficulty">
+        <label><input type="radio" name="difficulty" value="easy" checked> Easy</label>
+        <label><input type="radio" name="difficulty" value="medium"> Medium</label>
+        <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+    </div>
 </body>
 </html>
